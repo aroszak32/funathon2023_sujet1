@@ -56,6 +56,8 @@ La première étape en Quarto est de créer un *chunk* de setup où l'on appelle
 #| label: setup
 #| warning: false
 #| echo: false
+install.packages("ggthemes")
+install.packages("mapsf")
 library(tidyverse)
 library(sf)
 library(here)
@@ -102,19 +104,24 @@ Pour s'amuser avec les données, afficher le tableau des surfaces de votre canto
 #| warning: false
 
 mon_canton <- surfaces_ra1852 %>% 
-  filter(canton == "TOULOUSE") %>% ### Changer ici avec votre canton
+  filter(canton == "BETHUNE") %>% ### Changer ici avec votre canton
   pivot_longer(-c(code, canton, departement)) %>% 
   select(-c(code, canton, departement)) %>% 
   print()
 ```
 
-Alors quelle est le type de terre labourable la plus étendue ? Chez nous ce sont les céréales.   
-Avez-vous un peu de vigne ?
+Alors quelle est le type de terre labourable la plus étendue ? Chez nous ce sont les céréales.   Moi aussi
+Avez-vous un peu de vigne ? Non pas du tout
 
 Vous vérifierez que :     
 - cereales + racines_et_legumes_divers + cultures_diverses + prairies_artificielles + jacheres = total_des_terres_labourables      
 - total_des_terres_labourables +  prairies_naturelles + vignes + autres_cultures_arborescentes + paturages + autres_surfaces_ecoumene = superficie_totale     
 
+```{r}
+Controle_superficie <- mon_canton %>% 
+  pivot_wider() %>% 
+  mutate(TOT_SUP = total_des_terres_labourables - cereales - racines_et_legumes_divers - cultures_diverses - prairies_artificielles - jacheres)
+```
 
 ## 2 - Trouver les coordonnées géographiques des chefs-lieux de canton (utilisation d'une API)
 
