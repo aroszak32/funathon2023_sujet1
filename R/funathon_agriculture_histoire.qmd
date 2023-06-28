@@ -56,8 +56,8 @@ La première étape en Quarto est de créer un *chunk* de setup où l'on appelle
 #| label: setup
 #| warning: false
 #| echo: false
-install.packages("ggthemes")
-install.packages("mapsf")
+##install.packages("ggthemes")
+##install.packages("mapsf")
 library(tidyverse)
 library(sf)
 library(here)
@@ -308,11 +308,49 @@ Il se peut que des coordonnées de chefs-lieux ne soient pas trouvés. Identifie
 #| echo: true
 
 
-##################################################################################################################### 
-##################################################################################################################### 
-####################################### A COMPLETER    #####################################################
-##################################################################################################################### 
-#####################################################################################################################
+
+### afficher les coordonnées non trouvés :
+liste_coordonnees_non_trouvees <- surfaces_ra1852_coordonnees_centre %>%
+  filter(is.na(centre))
+
+print(liste_coordonnees_non_trouvees %>%
+        select(canton, departement, code_departement, centre))
+
+
+surfaces_ra1852_coordonnees_centre_corrigees <- surfaces_ra1852_coordonnees_centre %>%
+  mutate( centre =
+    case_when(
+      canton == "LA PALISSE" ~ list(c(3.6040518, 46.2613646)), # Aujourd'hui tout accroché
+      canton == "PONTS L'EVEQUE" ~ list(c(0.1415941, 49.2905376)),
+      canton == "AJACCIO" ~ list(c(8.623262, 41.9228409)), # Problème de département dans la recherche auto pour API
+      canton == "BASTIA" ~ list(c(9.4033732, 42.686163)),
+      canton == "CALVI" ~ list(c(8.7198407, 42.5498653)),
+      canton == "CORTE" ~ list(c(8.9865623, 42.2737575)),
+      canton == "SARTENE" ~ list(c(8.849981, 41.5753114)),
+      canton == "ISSINGEAUX" ~ list(c(4.0420206, 45.1343278)), # Avec un Y dans le nom
+      canton == "CHALONS SUR MARNE" ~ list(c(4.302215, 48.9655892)), # Ancien nom de Chalons en champagne
+      canton == "CHATEAU SALINS" ~ list(c(6.4721373, 48.8200817)), # Maintenant en Moselle
+      canton == "SARREBOURG" ~ list(c(7.0063386, 48.7329756)), # Idem
+      canton == "NAPOLEONVILLE" ~ list(c(-3.0109328, 48.0663472)), # Maintenant Pontivy
+      canton == "BRIEY" ~ list(c(5.9352709, 49.2584507)), # Maintenant en Meurthe-et-moselle
+      canton == "SCHLESTADT" ~ list(c(7.4174806, 48.2507288)),   # Maintenant Sélestat
+      canton == "BELFORT" ~ list(c(6.8203836, 47.6458405)), # Maintenant dans le Territoire de Belfort
+      canton == "SAINT DENIS" ~ list(c(2.3244174, 48.9268478)), # Nouveaux départements pour les villes d Île de France
+      canton == "SCEAUX" ~ list(c(2.285955, 48.7760123)),
+      canton == "CORBEIL" ~ list(c(2.4232699, 48.5973693)),
+      canton == "ETAMPES" ~ list(c(2.1111519, 48.4227852)),
+      canton == "PONTOISE" ~ list(c(2.0790004, 49.0488144)),
+      canton == "CASTEL SARRASIN" ~ list(c(0.965407, 44.0536266)), # Aujourd'hui tout accroché
+      canton == "GRASSE" ~ list(c(6.7666744, 43.6713791)),
+      canton == "NAPOLEON VENDEE" ~ list(c(-1.5719159, 46.6659612)), # Maintenant La roche-sur-Yon
+      canton == "REMIRMONT" ~ list(c(6.5603419, 48.0037694)), # Maintenant Remiremont
+      TRUE ~ centre
+    )
+
+
+  )
+
+```
 
 
 ```
@@ -328,11 +366,11 @@ Il ne vous reste plus qu'à séparer la colonne centre pour avoir la latitude et
 #| echo: true
 
 
-##################################################################################################################### 
-##################################################################################################################### 
-####################################### A COMPLETER    #####################################################
-##################################################################################################################### 
-#####################################################################################################################
+surfaces_ra1852_latlong <- surfaces_ra1852_coordonnees_centre_corrigees %>% 
+  mutate(latitude=str_split_fixed(centre,",",2)[,1],
+         longitude=str_split_fixed(centre,",",2)[,2]) %>% 
+  mutate(latitude=substr(latitude,3,9)) %>% 
+  mutate(longitude=substr(longitude,1,nchar(longitude)-1))
 
 ```
 
